@@ -52,6 +52,7 @@
     [[NSFileManager defaultManager]removeItemAtPath:[@"~/.minecraft/Minecraft.sh" stringByExpandingTildeInPath] error:nil];
     [lc writeToFile:[@"~/.minecraft/Minecraft.sh" stringByExpandingTildeInPath] atomically:NO encoding:NSUTF8StringEncoding error:nil];
     system([[@"chmod +x ~/.minecraft/Minecraft.sh" stringByExpandingTildeInPath]UTF8String]);
+    system([[@"rm -r ~/.minecraft/bin/minecraft.jar/__MACOSX" stringByExpandingTildeInPath]UTF8String]);
     NSTask * task = [[NSTask alloc]init];
     [task setLaunchPath:@"/bin/bash"];
     
@@ -94,6 +95,7 @@
     if([request.downloadDestinationPath isEqualToString:[@"~/.mcdist.zip" stringByExpandingTildeInPath]]) {
     system([[@"mv ~/.minecraft/options.txt ~/.mcopt" stringByExpandingTildeInPath]UTF8String]);
          system([[@"rm -rf ~/.minecraft/mods" stringByExpandingTildeInPath]UTF8String]);
+        system([[@"rm -rf ~/Library/Application\\ Support/minecraft/mods/*" stringByExpandingTildeInPath]UTF8String]);
       system([[@"mkdir ~/.minecraft" stringByExpandingTildeInPath]UTF8String]);
     system([[@"unzip -o ~/.mcdist.zip -d ~/.minecraft" stringByExpandingTildeInPath]UTF8String]);
     system([[@"mv ~/.mcopt ~/.minecraft/options.txt" stringByExpandingTildeInPath]UTF8String]);
@@ -104,15 +106,19 @@
         [[NSApplication sharedApplication] stopModal];
         [dlPanel orderOut:self];
         [ NSApp endSheet:dlPanel returnCode:0 ] ;
+        system([[@"rm ~/.mcdist.zip" stringByExpandingTildeInPath]UTF8String]);
     }
     if([request.downloadDestinationPath isEqualToString:[@"~/.mcmod.zip" stringByExpandingTildeInPath]]) {
         if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"jar"]) {
             system([[@"unzip -o ~/.mcmod.zip -d ~/.minecraft/bin/minecraft.jar" stringByExpandingTildeInPath]UTF8String]);
             system([[@"rm -rf ~/.minecraft/bin/minecraft.jar/META-INF/*MOJANG*" stringByExpandingTildeInPath]UTF8String]);
-        } else {
-            NSLog(@"%@",[[NSString stringWithFormat:@"mv \"~/.mcmod.zip\" \"~/.minecraft/mods/%@.zip\"" ,[[modsAvail objectAtIndex:request.tag]objectForKey:@"Name"]]stringByExpandingTildeInPath]);
-            system([[@"mkdir ~/.minecraft/mods" stringByExpandingTildeInPath]UTF8String]);
-            system([[@"mv ~/.mcmod.zip ~/.minecraft/mods/$(uuidgen).zip" stringByExpandingTildeInPath]UTF8String]);
+        }
+        if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"rsrc"]) {
+            system([[@"unzip -o ~/.mcmod.zip -d ~/Library/Application\\ Support/minecraft/resources/" stringByExpandingTildeInPath]UTF8String]);
+        }
+        if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"mods"]) {
+            system([[@"mkdir -p ~/Library/Application\\ Support/minecraft/mods" stringByExpandingTildeInPath]UTF8String]);
+            [[NSFileManager defaultManager]moveItemAtPath:[@"~/.mcmod.zip" stringByExpandingTildeInPath] toPath:[[NSString stringWithFormat:@"~/Library/Application Support/minecraft/mods/%@.zip",[[modsAvail objectAtIndex:request.tag]objectForKey:@"Name"]]stringByExpandingTildeInPath] error:nil];
             
         }
         self.curVer.stringValue = [NSString stringWithFormat:@"Current version on server: %@",[NSString stringWithContentsOfURL:[NSURL URLWithString:@"http://www.vladkorotnev.me/mcft/curver"] encoding:NSUTF8StringEncoding error:nil]];
@@ -126,6 +132,7 @@
         [msgBox setMessageText: [NSString stringWithFormat:@"Mod \"%@\" was installed.",[[modsAvail objectAtIndex:request.tag]objectForKey:@"Name"]]];
         [msgBox addButtonWithTitle: @"OK"];
         [msgBox runModal];
+        system([[@"rm ~/.mcmod.zip" stringByExpandingTildeInPath]UTF8String]);
     }
 }
 
@@ -180,8 +187,7 @@ objectValueForTableColumn:(NSTableColumn *) aTableColumn
                  row:(NSInteger ) rowIndex
 {
     if ([[[modsAvail objectAtIndex:rowIndex]objectForKey:@"Compat"]floatValue] != [[NSString stringWithContentsOfFile:[@"~/.minecraft/thisver" stringByExpandingTildeInPath] encoding:NSUTF8StringEncoding error:nil]floatValue]) {
-        NSLog(@"ModCompat: %f",[[[modsAvail objectAtIndex:rowIndex]objectForKey:@"Compat"]floatValue] );
-        NSLog(@"This: %f",[[NSString stringWithContentsOfFile:[@"~/.minecraft/thisver" stringByExpandingTildeInPath] encoding:NSUTF8StringEncoding error:nil]floatValue]);
+
         NSString * theHTML = [NSString stringWithFormat:@"<font face='Monaco' color=#EE0000>%@ <font size=2>[Needs %@, you have %@]</font></font>",[[modsAvail objectAtIndex:rowIndex]objectForKey:@"Name"],[[modsAvail objectAtIndex:rowIndex]objectForKey:@"Compat"] , [NSString stringWithContentsOfFile:[@"~/.minecraft/thisver" stringByExpandingTildeInPath] encoding:NSUTF8StringEncoding error:nil]];
         // fill the NSData buffer with the contents of the NSString
         NSData * htmlData = [theHTML dataUsingEncoding: NSUTF8StringEncoding];
@@ -217,5 +223,8 @@ objectValueForTableColumn:(NSTableColumn *) aTableColumn
     [[NSApplication sharedApplication] stopModal];
     [nwVerPanel orderOut:self];
     [ NSApp endSheet:nwVerPanel returnCode:0 ] ;
+}
+- (IBAction)openMods:(id)sender {
+     system([[@"open ~/Library/Application\\ Support/minecraft/mods" stringByExpandingTildeInPath]UTF8String]);
 }
 @end
