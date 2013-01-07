@@ -8,9 +8,25 @@
 
 #import <Cocoa/Cocoa.h>
 #import "ASIHTTPRequest.h"
-@interface AppDelegate : NSObject <NSApplicationDelegate,ASIProgressDelegate>
-@property (assign) IBOutlet NSTextField *name;
+@interface AppDelegate : NSObject <NSApplicationDelegate,ASIProgressDelegate,NSTableViewDataSource> {
+    NSPanel *modPanel;
+    NSScrollView *modList;
+    NSProgressIndicator *spinMods;
+    NSTableView *modTable;
+    NSButton *installModBtn;
+    NSArray * modsAvail;
+    
+    NSButton *closeModsBtn;
+    NSButton *modPanelBtn;
+    NSPanel *dlPanel;
+    NSPanel *newVerPanel;
+}
+- (IBAction)getUpd:(id)sender;
+- (IBAction)willDo:(id)sender;
+@property (assign) IBOutlet NSPanel *nwVerPanel;
 
+@property (assign) IBOutlet NSTextField *name;
+@property (assign) NSArray *modsAvail;
 @property (assign) IBOutlet NSWindow *window;
 @property (assign) IBOutlet NSPanel *processPanel;
 @property (assign) IBOutlet NSProgressIndicator *processProgress;
@@ -21,5 +37,19 @@
 - (IBAction)mcjar:(id)sender;
 @property (assign) IBOutlet NSTextField *curVer;
 @property (assign) IBOutlet NSTextField *youVer;
+@property (assign) IBOutlet NSPanel *modPanel;
+@property (assign) IBOutlet NSScrollView *modList;
+- (IBAction)refrMods:(id)sender;
+@property (assign) IBOutlet NSProgressIndicator *spinMods;
+@property (assign) IBOutlet NSTableView *modTable;
+- (IBAction)splashes:(id)sender;
+@property (assign) IBOutlet NSButton *installModBtn;
+- (IBAction)installMod:(id)sender;
+- (IBAction)closeMods:(id)sender;
+@property (assign) IBOutlet NSButton *closeModsBtn;
+@property (assign) IBOutlet NSButton *modPanelBtn;
+- (IBAction)openModPanel:(id)sender;
+@property (assign) IBOutlet NSPanel *dlPanel;
+- (IBAction)clsMeta:(id)sender;
 
 @end
