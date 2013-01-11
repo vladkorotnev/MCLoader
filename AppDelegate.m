@@ -94,8 +94,6 @@
 - (void)requestFinished:(ASIHTTPRequest *)request {
     if([request.downloadDestinationPath isEqualToString:[@"~/.mcdist.zip" stringByExpandingTildeInPath]]) {
     system([[@"mv ~/.minecraft/options.txt ~/.mcopt" stringByExpandingTildeInPath]UTF8String]);
-         system([[@"rm -rf ~/.minecraft/mods" stringByExpandingTildeInPath]UTF8String]);
-        system([[@"rm -rf ~/Library/Application\\ Support/minecraft/mods/*" stringByExpandingTildeInPath]UTF8String]);
       system([[@"mkdir ~/.minecraft" stringByExpandingTildeInPath]UTF8String]);
     system([[@"unzip -o ~/.mcdist.zip -d ~/.minecraft" stringByExpandingTildeInPath]UTF8String]);
     system([[@"mv ~/.mcopt ~/.minecraft/options.txt" stringByExpandingTildeInPath]UTF8String]);
