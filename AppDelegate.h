@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "ASIHTTPRequest.h"
-@interface AppDelegate : NSObject <NSApplicationDelegate,ASIProgressDelegate,NSTableViewDataSource> {
+@interface AppDelegate : NSObject <NSApplicationDelegate,ASIProgressDelegate,NSTableViewDataSource,NSTableViewDelegate> {
     NSPanel *modPanel;
     NSScrollView *modList;
     NSProgressIndicator *spinMods;

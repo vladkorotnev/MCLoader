@@ -23,7 +23,9 @@
 {
     [super dealloc];
 }
-
+- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
+    return  false;
+}
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     // Insert code here to initialize your application
@@ -42,6 +44,7 @@
     [modTable setAllowsColumnSelection:NO];
     [modTable setAllowsColumnResizing:NO];
     [modTable setAllowsColumnReordering:NO];
+    [modTable setDelegate:self];
     [self performSelector:@selector(checkUpd) withObject:nil afterDelay:1];
 }
 
@@ -90,7 +93,10 @@
         NSLog(@"DeveloperS?");
     }
 }
-
+- (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row {
+    [self.installModBtn setEnabled:true];
+    return  true;
+}
 - (void)requestFinished:(ASIHTTPRequest *)request {
     if([request.downloadDestinationPath isEqualToString:[@"~/.mcdist.zip" stringByExpandingTildeInPath]]) {
     system([[@"mv ~/.minecraft/options.txt ~/.mcopt" stringByExpandingTildeInPath]UTF8String]);
@@ -114,11 +120,21 @@
         if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"rsrc"]) {
             system([[@"unzip -o ~/.mcmod.zip -d ~/Library/Application\\ Support/minecraft/resources/" stringByExpandingTildeInPath]UTF8String]);
         }
+        if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"coremods"]) {
+            system([[@"mkdir -p ~/Library/Application\\ Support/minecraft/coremods/" stringByExpandingTildeInPath]UTF8String]);
+            system([[@"unzip -o ~/.mcmod.zip -d ~/Library/Application\\ Support/minecraft/coremods/" stringByExpandingTildeInPath]UTF8String]);
+            system([[@"rm -rf ~/Library/Application\\ Support/minecraft/coremods/__MACOSX" stringByExpandingTildeInPath]UTF8String]);
+        }
+        if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"text"]) {
+            system([[@"unzip -o ~/.mcmod.zip -d ~/Library/Application\\ Support/minecraft/texturepacks/" stringByExpandingTildeInPath]UTF8String]);
+            system([[@"rm -rf ~/Library/Application\\ Support/minecraft/texturepacks/__MACOSX" stringByExpandingTildeInPath]UTF8String]);
+        }
         if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"mods"]) {
             system([[@"mkdir -p ~/Library/Application\\ Support/minecraft/mods" stringByExpandingTildeInPath]UTF8String]);
             [[NSFileManager defaultManager]moveItemAtPath:[@"~/.mcmod.zip" stringByExpandingTildeInPath] toPath:[[NSString stringWithFormat:@"~/Library/Application Support/minecraft/mods/%@.zip",[[modsAvail objectAtIndex:request.tag]objectForKey:@"Name"]]stringByExpandingTildeInPath] error:nil];
             
         }
+        
         self.curVer.stringValue = [NSString stringWithFormat:@"Current version on server: %@",[NSString stringWithContentsOfURL:[NSURL URLWithString:@"http://www.vladkorotnev.me/mcft/curver"] encoding:NSUTF8StringEncoding error:nil]];
         self.youVer.stringValue = [NSString stringWithFormat:@"You have %@",[NSString stringWithContentsOfFile:[@"~/.minecraft/thisver" stringByExpandingTildeInPath] encoding:NSUTF8StringEncoding error:nil]];
         [self.spinMods setIndeterminate:true];
