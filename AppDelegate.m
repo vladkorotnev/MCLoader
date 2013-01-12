@@ -129,6 +129,11 @@
             system([[@"unzip -o ~/.mcmod.zip -d ~/Library/Application\\ Support/minecraft/texturepacks/" stringByExpandingTildeInPath]UTF8String]);
             system([[@"rm -rf ~/Library/Application\\ Support/minecraft/texturepacks/__MACOSX" stringByExpandingTildeInPath]UTF8String]);
         }
+        if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"modszip"]) {
+            system([[@"mkdir -p ~/Library/Application\\ Support/minecraft/mods/" stringByExpandingTildeInPath]UTF8String]);
+            system([[@"unzip -o ~/.mcmod.zip -d ~/Library/Application\\ Support/minecraft/mods/" stringByExpandingTildeInPath]UTF8String]);
+            system([[@"rm -rf ~/Library/Application\\ Support/minecraft/mods/__MACOSX" stringByExpandingTildeInPath]UTF8String]);
+        }
         if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"mods"]) {
             system([[@"mkdir -p ~/Library/Application\\ Support/minecraft/mods" stringByExpandingTildeInPath]UTF8String]);
             [[NSFileManager defaultManager]moveItemAtPath:[@"~/.mcmod.zip" stringByExpandingTildeInPath] toPath:[[NSString stringWithFormat:@"~/Library/Application Support/minecraft/mods/%@.zip",[[modsAvail objectAtIndex:request.tag]objectForKey:@"Name"]]stringByExpandingTildeInPath] error:nil];
