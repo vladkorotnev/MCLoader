@@ -9,6 +9,7 @@
 #import "AppDelegate.h"
 
 @implementation AppDelegate
+@synthesize modDescrippy;
 @synthesize nwVerPanel;
 @synthesize dlPanel;
 @synthesize closeModsBtn;
@@ -95,6 +96,24 @@
 }
 - (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row {
     [self.installModBtn setEnabled:true];
+    NSString * installsTo = @"";
+    if ([[[modsAvail objectAtIndex:row]objectForKey:@"Target"]isEqualToString:@"jar"])
+        installsTo = @"minecraft.jar";
+    if ([[[modsAvail objectAtIndex:row]objectForKey:@"Target"]isEqualToString:@"mods"])
+        installsTo = @"mods";
+    if ([[[modsAvail objectAtIndex:row]objectForKey:@"Target"]isEqualToString:@"modszip"])
+        installsTo = @"mods (as a folder)";
+    if ([[[modsAvail objectAtIndex:row]objectForKey:@"Target"]isEqualToString:@"coremods"])
+        installsTo = @"core mods";
+    if ([[[modsAvail objectAtIndex:row]objectForKey:@"Target"]isEqualToString:@"text"])
+        installsTo = @"texture pack";
+    if ([[[modsAvail objectAtIndex:row]objectForKey:@"Target"]isEqualToString:@"rsrc"])
+        installsTo = @"resources";
+    if ([[[modsAvail objectAtIndex:row]objectForKey:@"Target"]isEqualToString:@"conf"])
+        installsTo = @"Forge's configuration files";
+
+    [modDescrippy setStringValue: [NSString stringWithFormat:@"Description:\n%@\nInstalls to: %@",[[modsAvail objectAtIndex:row]objectForKey:@"Description" ],installsTo]];
+    
     return  true;
 }
 - (void)requestFinished:(ASIHTTPRequest *)request {
@@ -134,6 +153,14 @@
             system([[@"unzip -o ~/.mcmod.zip -d ~/Library/Application\\ Support/minecraft/mods/" stringByExpandingTildeInPath]UTF8String]);
             system([[@"rm -rf ~/Library/Application\\ Support/minecraft/mods/__MACOSX" stringByExpandingTildeInPath]UTF8String]);
         }
+        
+        if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"conf"]) {
+            system([[@"mkdir -p ~/Library/Application\\ Support/minecraft/config/" stringByExpandingTildeInPath]UTF8String]);
+            system([[@"unzip -o ~/.mcmod.zip -d ~/Library/Application\\ Support/minecraft/config/" stringByExpandingTildeInPath]UTF8String]);
+            system([[@"rm -rf ~/Library/Application\\ Support/minecraft/config/__MACOSX" stringByExpandingTildeInPath]UTF8String]);
+        }
+        
+        
         if ([[[modsAvail objectAtIndex:request.tag]objectForKey:@"Target"]isEqualToString:@"mods"]) {
             system([[@"mkdir -p ~/Library/Application\\ Support/minecraft/mods" stringByExpandingTildeInPath]UTF8String]);
             [[NSFileManager defaultManager]moveItemAtPath:[@"~/.mcmod.zip" stringByExpandingTildeInPath] toPath:[[NSString stringWithFormat:@"~/Library/Application Support/minecraft/mods/%@.zip",[[modsAvail objectAtIndex:request.tag]objectForKey:@"Name"]]stringByExpandingTildeInPath] error:nil];

@@ -20,11 +20,13 @@
     NSButton *modPanelBtn;
     NSPanel *dlPanel;
     NSPanel *newVerPanel;
+    NSTextField *modDescrippy;
 }
 - (IBAction)getUpd:(id)sender;
 - (IBAction)willDo:(id)sender;
 @property (assign) IBOutlet NSPanel *nwVerPanel;
 - (IBAction)openMods:(id)sender;
+@property (assign) IBOutlet NSTextField *modDescrippy;
 
 @property (assign) IBOutlet NSTextField *name;
 @property (assign) NSArray *modsAvail;
