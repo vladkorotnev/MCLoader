@@ -21,13 +21,15 @@
     NSPanel *dlPanel;
     NSPanel *newVerPanel;
     NSTextField *modDescrippy;
+    ASIHTTPRequest * request;
 }
 - (IBAction)getUpd:(id)sender;
 - (IBAction)willDo:(id)sender;
 @property (assign) IBOutlet NSPanel *nwVerPanel;
 - (IBAction)openMods:(id)sender;
 @property (assign) IBOutlet NSTextField *modDescrippy;
-
+- (IBAction)cancelDownloading:(id)sender;
+@property(assign)    ASIHTTPRequest * request;
 @property (assign) IBOutlet NSTextField *name;
 @property (assign) NSArray *modsAvail;
 @property (assign) IBOutlet NSWindow *window;

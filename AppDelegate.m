@@ -7,10 +7,9 @@
 //
 
 #import "AppDelegate.h"
-
+#import <Sparkle/Sparkle.h>
 @implementation AppDelegate
 @synthesize modDescrippy;
-@synthesize nwVerPanel;
 @synthesize dlPanel;
 @synthesize closeModsBtn;
 @synthesize modPanelBtn;
@@ -18,7 +17,7 @@
 @synthesize modTable;
 @synthesize installModBtn;
 @synthesize modPanel;
-@synthesize modList, modsAvail;
+@synthesize modList, modsAvail, request;
 
 - (void)dealloc
 {
@@ -27,10 +26,15 @@
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row{
     return  false;
 }
+- (void)_curServ{
+    self.curVer.stringValue = [NSString stringWithFormat:@"Current version on server: %@",[NSString stringWithContentsOfURL:[NSURL URLWithString:@"http://www.vladkorotnev.me/mcft/curver"] encoding:NSUTF8StringEncoding error:nil]];
+}
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    // Insert code here to initialize your application
-    self.curVer.stringValue = [NSString stringWithFormat:@"Current version on server: %@",[NSString stringWithContentsOfURL:[NSURL URLWithString:@"http://www.vladkorotnev.me/mcft/curver"] encoding:NSUTF8StringEncoding error:nil]];
+    [[SUUpdater sharedUpdater]setFeedURL:[NSURL URLWithString:@"http://vladkorotnev.github.com/soft/mcldr/sparkle.xml"]];
+    [[SUUpdater sharedUpdater]checkForUpdatesInBackground];
+ 
+    [self performSelectorInBackground:@selector(_curServ) withObject:self];
     self.youVer.stringValue = [NSString stringWithFormat:@"You have %@",[NSString stringWithContentsOfFile:[@"~/.minecraft/thisver" stringByExpandingTildeInPath] encoding:NSUTF8StringEncoding error:nil]];
     self.name.stringValue = [[NSUserDefaults standardUserDefaults]objectForKey:@"nick"];
     if(![[NSFileManager defaultManager]fileExistsAtPath:[@"~/.minecraft/thisver" stringByExpandingTildeInPath]]) {
@@ -46,7 +50,6 @@
     [modTable setAllowsColumnResizing:NO];
     [modTable setAllowsColumnReordering:NO];
     [modTable setDelegate:self];
-    [self performSelector:@selector(checkUpd) withObject:nil afterDelay:1];
 }
 
 - (IBAction)play:(id)sender {
@@ -75,25 +78,15 @@
                                    didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:)
                                       contextInfo:nil];
     
-    ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:@"http://www.vladkorotnev.me/mcft/cli.zip"]];
+   request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:@"http://www.vladkorotnev.me/mcft/cli.zip"]];
     [request setDownloadDestinationPath:[@"~/.mcdist.zip" stringByExpandingTildeInPath]];
     [request setDelegate:self];
     [self.processProgress setIndeterminate:false];
     [request setDownloadProgressDelegate:self.processProgress];
     [request startAsynchronous];
+    [request retain];
 }
--(void) checkUpd {
-    if ([[NSString stringWithContentsOfURL:[NSURL URLWithString:@"http://www.vladkorotnev.me/mcft/ldrver"] encoding:NSUTF8StringEncoding error:nil]floatValue ] > [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]floatValue]) {
-        [[NSApplication sharedApplication] beginSheet:nwVerPanel
-                                       modalForWindow:self.window
-                                        modalDelegate:self
-                                       didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:)
-                                          contextInfo:nil];
-    }
-    if ([[NSString stringWithContentsOfURL:[NSURL URLWithString:@"http://www.vladkorotnev.me/mcft/ldrver"] encoding:NSUTF8StringEncoding error:nil]floatValue ] < [[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"]floatValue]) {
-        NSLog(@"DeveloperS?");
-    }
-}
+
 - (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row {
     [self.installModBtn setEnabled:true];
     NSString * installsTo = @"";
@@ -180,6 +173,8 @@
         [msgBox runModal];
         system([[@"rm ~/.mcmod.zip" stringByExpandingTildeInPath]UTF8String]);
     }
+    [self.request release];
+    self.request = nil;
 }
 
 - (IBAction)optionsTxt:(id)sender {
@@ -204,13 +199,14 @@
     [modTable setEnabled:false];
     [closeModsBtn setEnabled:false];
     NSString * modUrl = [[modsAvail objectAtIndex:modTable.selectedRow]objectForKey:@"URL"];
-    ASIHTTPRequest * request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:modUrl]];
+    request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:modUrl]];
     [request setDownloadDestinationPath:[@"~/.mcmod.zip" stringByExpandingTildeInPath]];
     [request setDelegate:self];
     [request setTag:modTable.selectedRow];
     [self.spinMods setIndeterminate:false];
     [request setDownloadProgressDelegate:self.spinMods];
     [request startAsynchronous];
+    [request retain];
 }
 
 - (IBAction)closeMods:(id)sender {
@@ -267,10 +263,18 @@ objectValueForTableColumn:(NSTableColumn *) aTableColumn
 
 - (IBAction)willDo:(id)sender {
     [[NSApplication sharedApplication] stopModal];
-    [nwVerPanel orderOut:self];
-    [ NSApp endSheet:nwVerPanel returnCode:0 ] ;
+ 
 }
 - (IBAction)openMods:(id)sender {
      system([[@"open ~/Library/Application\\ Support/minecraft/mods" stringByExpandingTildeInPath]UTF8String]);
+}
+- (IBAction)cancelDownloading:(id)sender {
+    [request cancel];
+    [request release];
+    request= nil;
+    [[NSApplication sharedApplication] stopModal];
+    [dlPanel orderOut:self];
+    [ NSApp endSheet:dlPanel returnCode:0 ] ;
+    system([[@"rm ~/.mcdist.zip" stringByExpandingTildeInPath]UTF8String]);
 }
 @end
